@@ -156,8 +156,8 @@ class main_listener implements EventSubscriberInterface
 		$dl_mod_link_show = true;
 	
 		$this->template->assign_vars(array(
-			'EXT_PATH'		=> $ext_path,
-			'EXT_PATH_WEB'	=> $ext_path_web,
+			'EXT_DL_PATH'		=> $ext_path,
+			'EXT_DL_PATH_WEB'	=> $ext_path_web,
 		));
 
 		if (isset($this->config['dl_active']) && !$this->config['dl_active'])

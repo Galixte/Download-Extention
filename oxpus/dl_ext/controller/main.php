@@ -139,8 +139,8 @@ class main
 		define('DL_EXT_VER_IMAGES_WFOLDER',	$filebase_web_prefix . 'version/images/');
 
 		$this->template->assign_vars(array(
-			'EXT_PATH_WEB'		=> $ext_path_web,
-			'EXT_PATH_AJAX'		=> $ext_path_ajax,
+			'EXT_DL_PATH_WEB'		=> $ext_path_web,
+			'EXT_DL_PATH_AJAX'		=> $ext_path_ajax,
 			'ICON_DL_HELP'		=> '<img src="' . $ext_path_web . 'styles/' . rawurlencode($this->user->style['style_path']) . '/theme/images/dl_help.gif" alt="" />',
 			'IMG_DL_BLUE'		=> $ext_path_images . 'dl_blue.png',
 			'IMG_DL_BUTTON'		=> $ext_path_images . 'dl_button.png',
