@@ -26,8 +26,11 @@ function swap_options(cat)
 		return;
 	}
 
-	document.getElementById('options' + active_option).style.display = 'none';
-	document.getElementById('options' + cat).style.display = '';
+	document.getElementById('options' + active_option).className += " noshow";
+
+	document.getElementById('options' + cat).className =
+		document.getElementById('options' + cat).className.replace
+		( /(?:^|\s)noshow(?!\S)/g , '' )
 
 	active_cat = cat;
 }

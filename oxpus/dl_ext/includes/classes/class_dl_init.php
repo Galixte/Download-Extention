@@ -293,7 +293,7 @@ class dl_init extends dl_mod
 			foreach($dl_index as $key => $value)
 			{
 				// check the default cat permissions
-				if ($dl_index[$key]['auth_view'] == 1 || ($dl_index[$key]['auth_view'] == 2 && $user_logged_in))
+				if (isset($dl_index[$key]['auth_view']) && ($dl_index[$key]['auth_view'] == 1 || ($dl_index[$key]['auth_view'] == 2 && $user_logged_in)))
 				{
 					$dl_index[$key]['auth_view'] = true;
 				}
@@ -302,7 +302,7 @@ class dl_init extends dl_mod
 					$dl_index[$key]['auth_view'] = false;
 				}
 
-				if ($dl_index[$key]['auth_dl'] == 1 || ($dl_index[$key]['auth_dl'] == 2 && $user_logged_in))
+				if (isset($dl_index[$key]['auth_dl']) && ($dl_index[$key]['auth_dl'] == 1 || ($dl_index[$key]['auth_dl'] == 2 && $user_logged_in)))
 				{
 					$dl_index[$key]['auth_dl'] = true;
 				}
@@ -311,7 +311,7 @@ class dl_init extends dl_mod
 					$dl_index[$key]['auth_dl'] = false;
 				}
 
-				if ($dl_index[$key]['auth_up'] == 1 || ($dl_index[$key]['auth_up'] == 2 && $user_logged_in))
+				if (isset($dl_index[$key]['auth_up']) && ($dl_index[$key]['auth_up'] == 1 || ($dl_index[$key]['auth_up'] == 2 && $user_logged_in)))
 				{
 					$dl_index[$key]['auth_up'] = true;
 				}
@@ -320,7 +320,7 @@ class dl_init extends dl_mod
 					$dl_index[$key]['auth_up'] = false;
 				}
 
-				if ($dl_index[$key]['auth_mod'] == 1 || ($dl_index[$key]['auth_mod'] == 2 && $user_logged_in))
+				if (isset($dl_index[$key]['auth_mod']) && ($dl_index[$key]['auth_mod'] == 1 || ($dl_index[$key]['auth_mod'] == 2 && $user_logged_in)))
 				{
 					$dl_index[$key]['auth_mod'] = true;
 				}

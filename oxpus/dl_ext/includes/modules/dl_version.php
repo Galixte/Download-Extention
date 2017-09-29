@@ -72,6 +72,10 @@ else
 	$user_is_mod = false;
 }
 
+$user_is_guest = false;
+$user_is_admin = false;
+$user_is_founder = false;
+
 if (!$this->user->data['is_registered'])
 {
 	$user_is_guest = true;

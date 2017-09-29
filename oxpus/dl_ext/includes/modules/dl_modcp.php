@@ -70,6 +70,11 @@ if ($cat_id && $cat_auth['auth_mod'])
 	$deny_modcp = false;
 }
 
+if ($action == 'delete')
+{
+	$deny_modcp = false;
+}
+
 if ($deny_modcp)
 {
 	trigger_error($this->user->lang['DL_NO_PERMISSION']);
@@ -778,6 +783,10 @@ else
 								$sql_fav_user
 								AND " . $this->db->sql_in_set('user_id', explode(',', $processing_user));
 						$this->db->sql_query($sql);
+
+						$notification = $this->phpbb_container->get('notification_manager');
+						$notification_data = array('notification_id' => $df_id);
+						$notification->add_notifications('oxpus.dl_ext.notification.type.dl_ext', $notification_data);
 					}
 		
 					if ($this->config['dl_upload_traffic_count'] && !$file_extern && !$this->config['dl_traffic_off'])
@@ -853,6 +862,11 @@ else
 				$message		= $this->user->lang['DOWNLOAD_UPDATED'] . $thumb_message . '<br /><br />' . sprintf($return_string, '<a href="' . $meta_url . '">', '</a>') . $ver_message;
 			}
 		
+			if ($cat_auth['auth_up'])
+			{
+				$message .= '<br /><br />' . sprintf($this->user->lang['DL_UPLOAD_ONE_MORE'], '<a href="' . $this->helper->route('dl_ext_controller', array('view' => 'upload', 'cat_id' => $cat_id)) . '">', '</a>');
+			}
+
 			if (!$new_version)
 			{
 				meta_refresh(3, $meta_url);
@@ -863,7 +877,7 @@ else
 			trigger_error($message);
 		}
 		
-		if ($action == 'delete' && $cat_id)
+		if ($action == 'delete')
 		{
 			$dl_id = $this->request->variable('dlo_id', array(0));
 		
@@ -874,7 +888,7 @@ else
 					if (sizeof($dl_id) == 1)
 					{
 						$dl_file	= array();
-						$dl_file	= \oxpus\dl_ext\includes\classes\ dl_files::all_files($cat_id, '', 'ASC', '', intval($dl_id[0]), true, '*');
+						$dl_file	= \oxpus\dl_ext\includes\classes\ dl_files::all_files(0, '', 'ASC', '', intval($dl_id[0]), true, '*');
 		
 						$description			= $dl_file['description'];
 						$delete_confirm_text	= $this->user->lang['DL_CONFIRM_DELETE_SINGLE_FILE'];
@@ -898,14 +912,13 @@ else
 		
 					$s_hidden_fields = array(
 						'view'		=> 'modcp',
-						'cat_id'	=> $cat_id,
 						'df_id'		=> $df_id,
 						'action'	=> 'delete',
 						'confirm'	=> 1
 					);
 		
 					$i = 0;
-					foreach($dl_id as $cat_id => $value)
+					foreach($dl_id as $key => $value)
 					{
 						$s_hidden_fields = array_merge($s_hidden_fields, array('dlo_id[' . $i . ']' => $value));
 						$i++;
@@ -949,9 +962,8 @@ else
 						$this->db->sql_freeresult($result);
 					}
 		
-					$sql = 'SELECT c.path, d.real_file, d.thumbnail, d.dl_topic, d.id AS df_id FROM ' . DL_CAT_TABLE . ' c, ' . DOWNLOADS_TABLE . ' d
-						WHERE c.id = ' . (int) $cat_id . '
-							AND c.id = d.cat
+					$sql = 'SELECT c.path, d.cat, d.real_file, d.thumbnail, d.dl_topic, d.id AS df_id FROM ' . DL_CAT_TABLE . ' c, ' . DOWNLOADS_TABLE . ' d
+						WHERE c.id = d.cat
 							AND ' . $this->db->sql_in_set('d.id', $dl_ids);
 					$result = $this->db->sql_query($sql);
 		
@@ -959,6 +971,21 @@ else
 		
 					while ($row = $this->db->sql_fetchrow($result))
 					{
+						$cat_id = $row['cat'];
+
+						if (!$this->auth->acl_get('a_') && isset($index[$cat_id]['auth_mod']) && !$index[$cat_id]['auth_mod'])
+						{
+							trigger_error($user->lang['DL_NO_PERMISSION'] . __LINE__);
+						}
+						
+						$cat_auth = array();
+						$cat_auth = \oxpus\dl_ext\includes\classes\ dl_auth::dl_cat_auth($cat_id);
+						
+						if (!$this->auth->acl_get('a_') && !$cat_auth['auth_mod'])
+						{
+							trigger_error($user->lang['DL_NO_PERMISSION'] . __LINE__);
+						}
+						
 						$path		= $row['path'];
 						$real_file	= $row['real_file'];
 						$df_id		= $row['df_id'];
@@ -1049,7 +1076,7 @@ else
 					@unlink(DL_EXT_CACHE_FOLDER . 'data_dl_cat_counts.' . $this->php_ext);
 					@unlink(DL_EXT_CACHE_FOLDER . 'data_dl_file_preset.' . $this->php_ext);
 		
-					\oxpus\dl_ext\includes\classes\ dl_topic::delete_topic($dl_topics);
+					$return = \oxpus\dl_ext\includes\classes\ dl_topic::delete_topic($dl_topics);
 				}
 			}
 		
@@ -1287,15 +1314,25 @@ else
 			$s_select_version = '<select name="file_version">';
 			$s_select_ver_del = '<select name="file_ver_del[]" multiple="multiple" size="' . $multiple_size . '">';
 			$s_select_version .= '<option value="0" selected="selected">' . $this->user->lang['DL_VERSION_CURRENT'] . '</option>';
-		
+
+			$version_array = array();
+
 			while ($row = $this->db->sql_fetchrow($result))
 			{
-				$s_select_version .= '<option value="' . $row['ver_id'] . '">' . $row['ver_version'] . ' - ' . $this->user->format_date($row['ver_change_time']) . '</option>';
-				$s_select_ver_del .= '<option value="' . $row['ver_id'] . '">' . $row['ver_version'] . ' - ' . $this->user->format_date($row['ver_change_time']) . '</option>';
+				$version_array[$row['ver_version'] . ' - ' . $this->user->format_date($row['ver_change_time'])] = $row['ver_id'];
 			}
 		
 			$this->db->sql_freeresult($result);
-		
+
+			natsort($version_array);
+			$version_array = array_unique(array_reverse($version_array));
+
+			foreach($version_array as $key => $value)
+			{
+				$s_select_version .= '<option value="' . $value . '">' . $key . '</option>';
+				$s_select_ver_del .= '<option value="' . $value . '">' . $key . '</option>';
+			}
+
 			$s_select_version .= '</select>';
 			$s_select_ver_del .= '</select>';
 		

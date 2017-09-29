@@ -64,6 +64,21 @@ if ($cancel && $action == 'delete')
 */
 $comment_text = $this->request->variable('message', '', true);
 
+$dl_files = array();
+$dl_files = \oxpus\dl_ext\includes\classes\ dl_files::all_files(0, '', 'ASC', '', $df_id, $modcp, '*');
+
+if (!$dl_files)
+{
+	redirect($this->helper->route('dl_ext_controller'));
+}
+
+$this->template->assign_vars(array(
+	'DESCRIPTION'			=> $description,
+	'MINI_IMG'				=> $mini_icon,
+	'HACK_VERSION'			=> $hack_version,
+	'STATUS'				=> $status,
+));
+
 /*
 * check permissions to manage comments
 */
@@ -77,8 +92,8 @@ $row_user = $this->db->sql_fetchfield('user_id');
 $this->db->sql_freeresult($result);
 
 $allow_manage = 0;
-    if (($row_user == $this->user->data['user_id'] || $cat_auth['auth_mod'] || $index[$cat_id]['auth_mod'] || $this->auth->acl_get('a_')) && $this->user->data['is_registered'])
-	{
+if (($row_user == $this->user->data['user_id'] || $cat_auth['auth_mod'] || $index[$cat_id]['auth_mod'] || $this->auth->acl_get('a_')) && $this->user->data['is_registered'])
+{
 	$allow_manage = true;
 }
 

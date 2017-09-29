@@ -142,6 +142,7 @@ $lang = array_merge($lang, array(
 	'HELP_DL_RSS_DESC_LENGTH_SHORTEN'	=> 'Schneidet die Beschreibung der Downloads nach x Zeichen ab, wenn die Beschreibung verkürzt angezeigt werden soll (siehe vorherige Option).<br />Bei 0 wird die Beschreibung nicht angezeigt!',
 
 	'HELP_DL_SHORTEN_EXTERN_LINKS'	=> 'Gib die Länge des angezeigten externen Download Links an.<br />Je nach Länge wird der Link entweder in der Mitte oder von rechts beginnend gekürzt.<br />Lass dieses Feld leer oder gib 0 ein, um diese Funktion abzuschalten.',
+	'HELP_DL_SHOW_FOOTER_EXT_STATS'	=> 'Zeigt im Download Fuß zusätzlich für die eingestellte Benutzergruppe den voreingestellten Gesamttraffic für registrierte Benutzer und Gäste sowie die Anzahl Klicks im aktuellen Monat an.',
 	'HELP_DL_SHOW_FILE_HASH'		=> 'Zeigt den File-Hash in den Download Details an oder versteckt ihn.',
 	'HELP_DL_SHOW_FOOTER_LEGEND'	=> 'Diese Option schaltet die Legende mit den Icons für die unterschiedlichen Download Stati im Fußbereich der Downloads ein oder aus.<br />Die Icons bei den Downloads selber werden dadurch nicht beinflusst.',
 	'HELP_DL_SHOW_FOOTER_STAT'		=> 'Diese Option schaltet die Statistikzeilen im Fußbereich der Download Extension ein und aus.<br />Die Statistik wird weiterhin Daten sammeln, selbst wenn Du sie ausschaltest.',

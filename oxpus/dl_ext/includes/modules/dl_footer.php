@@ -105,6 +105,70 @@ if (sizeof($index) || $cat)
 		$l_can_download_again = '';
 	}
 
+	$ext_stats_enable = false;
+	switch($this->config['dl_mini_stats_ext'])
+	{
+		case 1:
+			$ext_stats_enable = true;
+		break;
+		case 2:
+			if ($this->user->data['is_registered'])
+			{
+				$ext_stats_enable = true;
+			}
+		break;
+		case 3:
+			if ($this->auth->acl_get('a_') && $this->user->data['is_registered'])
+			{
+				$ext_stats_enable = true;
+			}
+		break;
+		case 4:
+			if ($this->user->data['user_type'] == USER_FOUNDER)
+			{
+				$ext_stats_enable = true;
+			}
+		break;
+		default:
+			$ext_stats_enable = false;
+	}
+
+	if ($ext_stats_enable)
+	{
+		$overall_traffic = \oxpus\dl_ext\includes\classes\ dl_format::dl_size($this->config['dl_overall_traffic']);
+		$overall_guest_traffic = \oxpus\dl_ext\includes\classes\ dl_format::dl_size($this->config['dl_overall_guest_traffic']);
+
+		global $dl_file_p;
+		$total_cur_clicks = 0;
+
+		foreach ($dl_file_p as $dl_id => $row)
+		{
+			$total_cur_clicks += $row['klicks'];
+		}
+
+		$this->template->assign_vars(array(
+			'EXT_STATS_OVERALL_TRAFFIC'			=> $this->user->lang['DL_OVERALL_TRAFFIC'] . ': ' . $overall_traffic,
+			'EXT_STATS_OVERALL_GUESTS_TRAFFIC'	=> $this->user->lang['DL_OVERALL_GUEST_TRAFFIC'] . ': ' . $overall_guest_traffic,
+			'EXT_STATS_MONTH_CLICKS'			=> $this->user->lang['DL_KLICKS'] . ': ' . $total_cur_clicks,
+		));
+	}
+
+	/*
+	* Check for latest downloads and prepare link
+	*/
+	$check_add_time		= time() - ($this->config['dl_new_time'] * 86400);
+	$check_edit_time	= time() - ($this->config['dl_edit_time'] * 86400);
+	
+	$sql_latest_where = 'AND (add_time >= ' . (int) $check_add_time . ' OR change_time >= ' . (int) $check_edit_time . ')';
+	
+	$dl_latest_files = array();
+	$dl_latest_files = \oxpus\dl_ext\includes\classes\ dl_files::all_files(0, '', '', $sql_latest_where, 0, 0, 'id');
+	
+	if (sizeof($dl_latest_files))
+	{
+		$this->template->assign_var('U_LATEST_DOWNLOADS', $this->helper->route('dl_ext_controller', array('view' => 'latest')));
+	}
+
 	/*
 	* load footer template and send default values
 	*/

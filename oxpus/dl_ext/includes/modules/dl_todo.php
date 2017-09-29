@@ -133,7 +133,7 @@ else
 		WHERE d.cat = c.id
 			AND ' . $this->db->sql_in_set('d.cat', $todo_access_ids) . "
 			AND (todo = '' OR todo IS NULL)
-		ORDER BY c.sort, c.parent, d.description";
+		ORDER BY c.parent, c.sort, c.id, d.description";
  	$result = $this->db->sql_query($sql);
 
 	$total_possible_todo = $this->db->sql_affectedrows($result);

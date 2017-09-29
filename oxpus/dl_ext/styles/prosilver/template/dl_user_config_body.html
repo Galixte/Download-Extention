@@ -54,6 +54,7 @@ function select_switch(status)
 			<dd>
 				<label><input type="radio" class="radio" name="user_dl_note_type" value="1" {USER_DL_NOTE_TYPE_POPUP}/>&nbsp;{L_USER_DOWNLOAD_NOTIFY_TYPE_POPUP}</label>
 				<label><input type="radio" class="radio" name="user_dl_note_type" value="0" {USER_DL_NOTE_TYPE_MESSAGE}/>&nbsp;{L_USER_DOWNLOAD_NOTIFY_TYPE_MESSAGE}</label>
+				<label><input type="radio" class="radio" name="user_dl_note_type" value="2" {USER_DL_NOTE_TYPE_NOTIFY}/>&nbsp;{L_USER_DOWNLOAD_NOTIFY_TYPE_NOTIFY}</label>
 			</dd>
 		</dl>
 
@@ -178,7 +179,12 @@ function select_switch(status)
 <!-- ENDIF -->
 
 <fieldset class="submit-buttons">
+<!-- IF S_DL_UCP -->
 	<input type="reset" value="{L_RESET}" name="reset" class="button2" />&nbsp;<input type="submit" name="submit" value="{L_SUBMIT}" class="button1" />
+<!-- ELSE -->
+	<input type="reset" value="{L_RESET}" name="reset" style="height: 28px;" class="button icon-button" />&nbsp;&nbsp;
+    <input type="submit" name="submit" value="{L_SUBMIT}" style="height: 28px;" class="button icon-button" />
+<!-- ENDIF -->
 	{S_FORM_TOKEN}
 </fieldset>
 

@@ -335,7 +335,7 @@ class dl_topic extends dl_mod
 			include(dl_init::phpbb_root_path() . 'includes/functions_admin' . dl_init::phpEx());
 		}
 
-		$return = delete_topics('topic_id', $topic_ids);
+		return delete_topics('topic_id', $topic_ids);
 	}
 
 	public static function update_topic($topic_id, $dl_id, $helper)

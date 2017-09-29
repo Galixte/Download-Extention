@@ -65,40 +65,27 @@
 <div class="panel">
 	<div class="inner">
 
-		<ul class="topiclist">
-			<li class="header">
+		<fieldset class="submit-buttons">
+		<form action="{S_FORM_ACTION}" method="post" id="filter_report" style="float: left; margin-right: 5px;">
+			<div>{S_SELECT_FILTER}&nbsp;<input type="submit" name="submit" value="{L_DL_FILTER}" class="button1" /></div>
+		</form>
+		<!-- IF S_OWN_REPORT -->
+		<form action="{S_FORM_OWN_ACTION}" method="post" id="filter_own_report" style="float: left; margin-right: 5px;">
+			<div><input type="submit" name="submit" value="{L_DL_FILTER_BT_OWN}" class="button2" /></div>
+		</form>
+		<!-- ENDIF -->
+		<!-- IF S_ASSIGN_REPORT -->
+		<form action="{S_FORM_ASSIGN_ACTION}" method="post" id="filter_assign_report" style="float: left; margin-right: 5px;">
+			<div><input type="submit" name="submit" value="{L_DL_FILTER_BT_ASSIGN}" class="button2" /></div>
+		</form>
+		<!-- ENDIF -->
+		<!-- IF S_ADD_NEW_REPORT -->
+		<form action="{S_FORM_ADD_ACTION}" method="post" id="add_new_report" style="float: left; margin-right: 5px;">
+			<div><input type="submit" name="submit" value="{L_NEW_POST}" class="button1" /></div>
+		</form>
+		<!-- ENDIF -->
 
-				<dl>
-					<dd>
-					<form action="{S_FORM_ACTION}" method="post" id="filter_report">
-						<div>{S_SELECT_FILTER}&nbsp;<input type="submit" name="submit" value="{L_DL_FILTER}" class="button1" /></div>
-					</form>
-					</dd>
-					<!-- IF S_OWN_REPORT -->
-					<dd>
-					<form action="{S_FORM_OWN_ACTION}" method="post" id="filter_own_report">
-						<div><input type="submit" name="submit" value="{L_DL_FILTER_BT_OWN}" class="button2" /></div>
-					</form>
-					</dd>
-					<!-- ENDIF -->
-					<!-- IF S_ASSIGN_REPORT -->
-					<dd>
-					<form action="{S_FORM_ASSIGN_ACTION}" method="post" id="filter_assign_report">
-						<div><input type="submit" name="submit" value="{L_DL_FILTER_BT_ASSIGN}" class="button2" /></div>
-					</form>
-					</dd>
-					<!-- ENDIF -->
-					<!-- IF S_ADD_NEW_REPORT -->
-					<dd>
-					<form action="{S_FORM_ACTION}" method="post" id="add_new_report">
-						<div><input type="submit" name="submit" value="{L_NEW_POST}" class="button1" />{S_HIDDEN_FIELDS}</div>
-					</form>
-					</dd>
-					<!-- ENDIF -->
-				</dl>
-
-			</li>
-		</ul>
+		</fieldset>
 
 	</div>
 </div>

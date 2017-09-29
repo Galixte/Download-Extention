@@ -27,8 +27,18 @@ $sort_dir			= $this->request->variable('sort_dir', 'ASC');
 $search_in_fields	= $this->request->variable('search_fields', 'all');
 $search_author		= $this->request->variable('search_author', '', true);
 
-$search_fnames		= array($this->user->lang['DL_ALL'], $this->user->lang['DL_FILE_NAME'], $this->user->lang['DL_FILE_DESCRIPTION'], $this->user->lang['DL_DETAIL']);
-$search_fields		= array('all', 'file_name', 'description', 'long_desc');
+$search_fnames		= array(
+	$this->user->lang['DL_ALL'], 
+	$this->user->lang['DL_FILE_NAME'], 
+	$this->user->lang['DL_FILE_DESCRIPTION'], 
+	$this->user->lang['DL_DETAIL'], 
+	$this->user->lang['DL_MOD_TEST'], 
+	$this->user->lang['DL_MOD_DESC'], 
+	$this->user->lang['DL_MOD_WARNING'], 
+	$this->user->lang['DL_MOD_TODO'], 
+	$this->user->lang['DL_MOD_REQUIRE']
+);
+$search_fields		= array('all', 'file_name', 'description', 'long_desc', 'test', 'mod_desc', 'warning', 'todo', 'req');
 $search_type		= $this->request->variable('search_type', 0);
 
 $submit = $this->request->variable('submit', '');
@@ -61,11 +71,16 @@ if ($search_keywords != '' && !$search_author)
 	switch($search_in_fields)
 	{
 		case 'all':
-			$sql_fields = 'd.file_name, d.description, d.long_desc';
+			$sql_fields = 'd.file_name, d.description, d.long_desc, d.test, d.mod_desc, d.warning, d.todo, d.req';
 			break;
 		case 'file_name':
 		case 'description':
 		case 'long_desc':
+		case 'test':
+		case 'mod_desc':
+		case 'warning':
+		case 'todo':
+		case 'req':
 			$sql_fields = "d.$search_in_fields";
 			break;
 		default:
@@ -90,7 +105,7 @@ if ($search_keywords != '' && !$search_author)
 		{
 			if ($search_in_fields == 'all')
 			{
-				$search_result = $row['file_name'] . $row['description'] . $row['long_desc'];
+				$search_result = $row['file_name'] . $row['description'] . $row['long_desc'] . $row['test'] . $row['mod_desc'] . $row['warning'] . $row['todo'] . $row['req'];
 			}
 			else
 			{
@@ -176,7 +191,7 @@ if ($search_keywords != '' && !$search_author)
 			}
 
 			$cat_name			= $row['cat_name'];
-			$u_cat_link			= $this->helper->route('dl_ext_controller', array('view' => 'detail', 'cat' => $cat_id));
+			$u_cat_link			= $this->helper->route('dl_ext_controller', array('cat' => $cat_id));
 
 			$description		= $row['description'];
 			$desc_uid			= $row['desc_uid'];

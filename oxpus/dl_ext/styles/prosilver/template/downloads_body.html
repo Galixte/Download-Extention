@@ -7,12 +7,12 @@ var phpEx = '{PHPEX}';
 var dl_ajax_url = '{U_DL_AJAX}';
 // ]]>
 </script>
-<script type="text/javascript" src="{EXT_PATH_AJAX}ajax_dl.js"></script>
+<script type="text/javascript" src="{EXT_DL_PATH_AJAX}ajax_dl.js"></script>
 <!-- ENDIF -->
 
-<p>
-	<strong><!-- IF DL_MODCP -->{L_MODERATORS}<!-- ENDIF --></strong> {DL_MODCP}
-</p>
+<h2>{INDEX_CAT_TITLE}</h2>
+
+<p><strong><!-- IF DL_MODCP -->{L_MODERATORS}<!-- ENDIF --></strong> {DL_MODCP}</p>
 
 <div class="action-bar top">
 	<div class="buttons"><!-- IF S_DL_UPLOAD --><a href="{DL_UPLOAD}" class="button icon-button reply-icon">{L_DL_UPLOAD}</a><!-- ENDIF --></div>
@@ -70,16 +70,17 @@ var dl_ajax_url = '{U_DL_AJAX}';
 				</dt>
 				<dd class="topics">{downloads.FILE_SIZE}</dd>
 				<dd class="posts"><div>{downloads.FILE_KLICKS} &bull; {downloads.FILE_OVERALL_KLICKS}</div></dd>
-				<!-- BEGIN comments -->
 				<dd class="lastposts" style="display: block;">
 					<!-- IF S_ENABLE_RATE and downloads.RATING_IMG --><div id="rating_{downloads.DF_ID}">{downloads.RATING_IMG}<br />{downloads.RATINGS}</div><!-- ENDIF -->
-					<ul class="post-buttons">
+    				<!-- BEGIN comments -->
+					<br />
+                    <ul class="post-buttons">
 						<li><strong>{L_DL_COMMENTS}</strong> &nbsp; </li> 
 						<!-- IF downloads.comments.U_COMMENT_POST --><li><a href="{downloads.comments.U_COMMENT_POST}" class="button icon-button edit-icon" title="{L_DL_POST_COMMENT}"><span>{L_DL_POST_COMMENT}</span></a></li><!-- ENDIF -->
 						<!-- IF downloads.comments.U_COMMENT_SHOW --><li><a href="{downloads.comments.U_COMMENT_SHOW}" class="button icon-button info-icon" title="{L_DL_VIEW_COMMENTS}"><span>{L_DL_VIEW_COMMENTS}</span></a></li><!-- ENDIF -->
 					</ul>
+    				<!-- END comments -->
 				</dd>
-				<!-- END comments -->
 			</dl>
 		</li>
 		<!-- END downloads -->

@@ -127,8 +127,9 @@ class main_module
 				$allow_com_email_yes	= ($user->data['user_allow_fav_comment_email']) ? 'checked="checked"' : '';
 				$allow_com_email_no		= (!$user->data['user_allow_fav_comment_email']) ? 'checked="checked"' : '';
 
-				$user_dl_note_type_popup	= ($user->data['user_dl_note_type']) ? 'checked="checked"' : '';
-				$user_dl_note_type_message	= (!$user->data['user_dl_note_type']) ? 'checked="checked"' : '';
+				$user_dl_note_type_popup	= ($user->data['user_dl_note_type'] == 1) ? 'checked="checked"' : '';
+				$user_dl_note_type_message	= ($user->data['user_dl_note_type'] == 0) ? 'checked="checked"' : '';
+				$user_dl_note_type_notify	= ($user->data['user_dl_note_type'] == 2) ? 'checked="checked"' : '';
 				$user_dl_sort_opt			= ($user->data['user_dl_sort_opt']) ? 'checked="checked"' : '';
 
 				$user_dl_sub_on_index_yes	= ($user->data['user_dl_sub_on_index']) ? 'checked="checked"' : '';
@@ -183,6 +184,7 @@ class main_module
 
 					'USER_DL_NOTE_TYPE_POPUP'			=> $user_dl_note_type_popup,
 					'USER_DL_NOTE_TYPE_MESSAGE'			=> $user_dl_note_type_message,
+					'USER_DL_NOTE_TYPE_NOTIFY'			=> $user_dl_note_type_notify,
 
 					'USER_DL_SUB_ON_INDEX_YES'			=> $user_dl_sub_on_index_yes,
 					'USER_DL_SUB_ON_INDEX_NO'			=> $user_dl_sub_on_index_no,

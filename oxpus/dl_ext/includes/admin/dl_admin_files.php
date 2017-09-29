@@ -716,6 +716,7 @@ else if($action == 'save')
 					'ver_add_user'		=> ($file_option) ? $user->data['user_id'] : $dl_file['add_user'],
 					'ver_change_user'	=> ($file_option) ? $user->data['user_id'] : $dl_file['change_user'],
 					'ver_active'		=> 0,
+					'ver_text'			=> '',
 				));
 
 				$db->sql_query($sql);
@@ -1019,6 +1020,10 @@ else if($action == 'save')
 				$db->sql_query($sql);
 			}
 		}
+
+		$notification = $phpbb_container->get('notification_manager');
+		$notification_data = array('notification_id' => $dl_t_id);
+		$notification->add_notifications('oxpus.dl_ext.notification.type.dl_ext', $notification_data);
 	}
 
 	if ($df_id)
@@ -1096,7 +1101,6 @@ else if($action == 'delete')
 		$real_ver_file = array();
 		while ($row = $db->sql_fetchrow($result))
 		{
-			$ver_ids[] = $row['ver_id'];
 			$real_ver_file[$row['dl_id']] = $row['ver_real_file'];
 		}
 
@@ -1120,7 +1124,7 @@ else if($action == 'delete')
 			}
 
 			$sql = 'SELECT file_type, real_name FROM ' . DL_VER_FILES_TABLE . '
-				WHERE ' . $db->sql_in_set('ver_id', $ver_ids);
+					WHERE dl_id = ' . (int) $df_id;
 			$result = $db->sql_query($sql);
 
 			while ($row = $db->sql_fetchrow($result))

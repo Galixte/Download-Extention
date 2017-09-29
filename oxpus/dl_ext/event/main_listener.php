@@ -122,28 +122,23 @@ class main_listener implements EventSubscriberInterface
 		}
 
 		$event['lang_set_ext'] = $lang_set_ext;
-
 	}
 
 	public function add_download_message($event)
 	{
-		if ( isset($this->user->data['user_new_download']) && $this->user->data['user_new_download'])
+		if (isset($this->user->data['user_new_download']) && $this->user->data['user_new_download'] && $this->user->data['user_dl_note_type'] <> 2)
 		{
 			$sql = 'UPDATE ' . USERS_TABLE . '
 				SET user_new_download = 0
 				WHERE user_id = ' . (int)$this->user->data['user_id'];
 			$this->db->sql_query($sql);
 
-			$new_dl_link = $this->helper->route('dl_ext_controller');
-			if (strpos($new_dl_link, 'app.' . $this->php_ext . '/dl_ext') === false)
-			{
-				$new_dl_link = str_replace('/dl_ext', '/app.' . $this->php_ext . '/dl_ext', $new_dl_link);
-			}
+			$new_dl_link = $this->helper->route('dl_ext_controller', array('view' => 'latest'));
 
 			$this->template->assign_vars(array(
 				'NEW_DOWNLOAD_MESSAGE'	=> sprintf($this->user->lang['NEW_DOWNLOAD'], $new_dl_link),
-				'S_NEW_DL_POPUP'		=> ($this->user->data['user_dl_note_type']) ? true : false,
-				'S_NEW_DL_MESSAGE'		=> (!$this->user->data['user_dl_note_type']) ? true : false,
+				'S_NEW_DL_POPUP'		=> ($this->user->data['user_dl_note_type'] == 1) ? true : false,
+				'S_NEW_DL_MESSAGE'		=> ($this->user->data['user_dl_note_type'] == 0) ? true : false,
 			));
 		}
 	}
@@ -161,8 +156,8 @@ class main_listener implements EventSubscriberInterface
 		$dl_mod_link_show = true;
 	
 		$this->template->assign_vars(array(
-			'EXT_PATH'		=> $ext_path,
-			'EXT_PATH_WEB'	=> $ext_path_web,
+			'EXT_DL_PATH'		=> $ext_path,
+			'EXT_DL_PATH_WEB'	=> $ext_path_web,
 		));
 
 		if (isset($this->config['dl_active']) && !$this->config['dl_active'])
@@ -200,10 +195,6 @@ class main_listener implements EventSubscriberInterface
 		if ($dl_mod_link_show)
 		{
 			$dl_main_link = $this->helper->route('dl_ext_controller');
-			if (strpos($dl_main_link, 'app.' . $this->php_ext . '/dl_ext') === false)
-			{
-				$dl_main_link = str_replace('/dl_ext', '/app.' . $this->php_ext . '/dl_ext', $dl_main_link);
-			}
 
 			$this->template->assign_vars(array(
 				'U_DL_NAVI'		=> $dl_main_link,
@@ -223,10 +214,6 @@ class main_listener implements EventSubscriberInterface
 					if ($total)
 					{
 						$dl_hacks_link = $this->helper->route('dl_ext_controller', array('view' => 'hacks'));
-						if (strpos($dl_hacks_link, 'app.' . $this->php_ext . '/dl_ext') === false)
-						{
-							$dl_hacks_link = str_replace('/dl_ext', '/app.' . $this->php_ext . '/dl_ext', $dl_hacks_link);
-						}
 
 						$this->template->assign_vars(array(
 							'U_DL_HACKS_LIST'	=> $dl_hacks_link,
@@ -252,10 +239,6 @@ class main_listener implements EventSubscriberInterface
 				if (isset($row) && $row['total'] != 0)
 				{
 					$dl_bt_link = $this->helper->route('dl_ext_controller', array('view' => 'bug_tracker'));
-					if (strpos($dl_bt_link, 'app.' . $this->php_ext . '/dl_ext') === false)
-					{
-						$dl_bt_link = str_replace('/dl_ext', '/app.' . $this->php_ext . '/dl_ext', $dl_bt_link);
-					}
 
 					$this->template->assign_vars(array(
 						'U_DL_BUG_TRACKER'	=> $dl_bt_link,
@@ -269,29 +252,28 @@ class main_listener implements EventSubscriberInterface
 
 	public function add_dl_ext_viewonline($event)
 	{
-		if ($event['row']['session_page'] === 'app.php/dl_ext' || $event['row']['session_page'] === 'app.' . $this->php_ext . '/dl_ext.php')
+		if (strpos($event['row']['session_page'], '/dl_ext') !== false)
 		{
-			if (strpos($event['row']['session_page'], 'view=hacks'))
+			if (strpos($event['row']['session_page'], '/dl_ext/?view=hacks') !== false)
 			{
-				$dl_main_link = $this->helper->route('dl_ext_controller');
-				if (strpos($dl_main_link, 'app.' . $this->php_ext . '/dl_ext') === false)
-				{
-					$dl_main_link = str_replace('/dl_ext', '/app.' . $this->php_ext . '/dl_ext', $dl_main_link);
-				}
-
-				$event['location'] = $this->user->lang('DL_PAGE_DOWNLOADS');
+				$dl_hacks_link = $this->helper->route('dl_ext_controller', array('view' => 'hacks'));
+	
+				$event['location'] = $this->user->lang('DL_PAGE_DL_HACKSLIST');
+				$event['location_url'] = $dl_hacks_link;
+			}
+			else if (strpos($event['row']['session_page'], '/dl_ext/?view=bug_tracker') !== false)
+			{
+				$dl_main_link = $this->helper->route('dl_ext_controller', array('view' => 'bug_tracker'));
+	
+				$event['location'] = $this->user->lang('DL_PAGE_BUG_TRACKER');
 				$event['location_url'] = $dl_main_link;
 			}
 			else
 			{
-				$dl_hacks_link = $this->helper->route('dl_ext_controller', array('view' => 'hacks'));
-				if (strpos($dl_hacks_link, 'app.' . $this->php_ext . '/dl_ext') === false)
-				{
-					$dl_hacks_link = str_replace('/dl_ext', '/app.' . $this->php_ext . '/dl_ext', $dl_hacks_link);
-				}
-
-				$event['location'] = $this->user->lang('DL_PAGE_DL_HACKSLIST');
-				$event['location_url'] = $dl_hacks_link;
+				$dl_main_link = $this->helper->route('dl_ext_controller');
+	
+				$event['location'] = $this->user->lang('DL_PAGE_DOWNLOADS');
+				$event['location_url'] = $dl_main_link;
 			}
 		}
 	}
@@ -544,11 +526,11 @@ class main_listener implements EventSubscriberInterface
 
 		if ($title)
 		{
-			return $title;
+			return $title . '</a>';
 		}
 		else
 		{
-			return $part[0];
+			return $part[0] . '</a>';
 		}
 	}
 

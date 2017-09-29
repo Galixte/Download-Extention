@@ -589,7 +589,7 @@ class release_7_0_0 extends \phpbb\db\migration\migration
 			return;
 		}
 
-		global $db, $dbms;
+		global $dbms;
 
 		switch ($dbms)
 		{
@@ -603,10 +603,10 @@ class release_7_0_0 extends \phpbb\db\migration\migration
 			case 'phpbb\\db\\driver\\mysql':
 			case 'phpbb\\db\\driver\\mysqli':
 				$sql = 'ALTER TABLE ' . $this->table_prefix . 'downloads ENGINE = MyISAM';
-				$db->sql_query($sql);
+				$this->db->sql_query($sql);
 	
 				$sql = 'ALTER TABLE ' . $this->table_prefix . 'downloads CHANGE COLUMN description description MEDIUMTEXT NOT NULL';
-				$db->sql_query($sql);
+				$this->db->sql_query($sql);
 	
 				$statement = 'ALTER TABLE ' . $this->table_prefix . 'downloads ADD FULLTEXT INDEX desc_search(description)';
 			break;
@@ -618,7 +618,7 @@ class release_7_0_0 extends \phpbb\db\migration\migration
 			break;
 		}
 
-		$db->sql_query($statement);
+		$this->db->sql_query($statement);
 	}
 
 	public function prepare_banlist()
@@ -629,9 +629,7 @@ class release_7_0_0 extends \phpbb\db\migration\migration
 			return;
 		}
 
-		global $db;
-
-		$db->sql_query('INSERT INTO ' . $this->table_prefix . 'dl_banlist ' . $db->sql_build_array('INSERT', array('user_agent' => 'n/a')));
+		$this->db->sql_query('INSERT INTO ' . $this->table_prefix . 'dl_banlist ' . $this->db->sql_build_array('INSERT', array('user_agent' => 'n/a')));
 	}
 
 	public function add_default_blacklist_extentions()
@@ -641,8 +639,6 @@ class release_7_0_0 extends \phpbb\db\migration\migration
 		{
 			return;
 		}
-
-		global $db;
 
 		$sql_insert = array(
 			array('extention'	=> 'asp'),
@@ -662,7 +658,7 @@ class release_7_0_0 extends \phpbb\db\migration\migration
 			array('extention'	=> 'shtml'),
 		);
 
-		$db->sql_multi_insert($this->table_prefix . 'dl_ext_blacklist', $sql_insert);
+		$this->db->sql_multi_insert($this->table_prefix . 'dl_ext_blacklist', $sql_insert);
 	}
 
 	public function first_reset_remain_traffic()
@@ -673,13 +669,11 @@ class release_7_0_0 extends \phpbb\db\migration\migration
 			return;
 		}
 
-		global $db;
-
 		$sql_insert = array(
 			array('config_name' => 'dl_remain_guest_traffic', 'config_value' => '0'),
 			array('config_name' => 'dl_remain_traffic', 'config_value' => '0'),
 		);
 
-		$db->sql_multi_insert($this->table_prefix . 'dl_rem_traf', $sql_insert);
+		$this->db->sql_multi_insert($this->table_prefix . 'dl_rem_traf', $sql_insert);
 	}
 }

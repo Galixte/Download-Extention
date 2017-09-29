@@ -165,9 +165,15 @@ if($action == 'edit' || $action == 'add')
 		$perms_copy_from	.= '</select>';
 	}
 
+	$t_path_select = \oxpus\dl_ext\includes\classes\ dl_physical::get_file_base_tree(DL_EXT_FILES_WEBFOLDER, $cat_path);
 	$s_path_select = '<select name="path">';
 	$s_path_select .= '<option value="/">' . $user->lang['DL_CAT_PATH_SELECT'] . '</option>';
-	$s_path_select .= \oxpus\dl_ext\includes\classes\ dl_physical::get_file_base_tree(DL_EXT_FILES_WEBFOLDER, $cat_path);
+	sort($t_path_select);
+	foreach ($t_path_select as $key => $value)
+	{
+		$tree_data = $t_path_select[$key];
+		$s_path_select .= '<option value="' . $tree_data['cat_path'] . '"' . $tree_data['selected'] . '>' . $tree_data['entry'] . '</option>';
+	}
 	$s_path_select .= '</select>';
 	$s_path_select = str_replace('value="' . $cat_path . '">', 'value="' . $cat_path . '" selected="selected">', $s_path_select);
 

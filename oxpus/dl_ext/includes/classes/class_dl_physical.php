@@ -375,7 +375,7 @@ class dl_physical extends dl_mod
 	*/	
 	public static function get_file_base_tree($file_base, $path, $level = 0)
 	{
-		$tree = '';
+		$tree = array();
 		if (substr($file_base, -1, 1) != '/')
 		{
 			$file_base .= '/';
@@ -388,27 +388,37 @@ class dl_physical extends dl_mod
 			if (@is_dir($file_base . $entry) && $entry[0] != '.')
 			{
 				$separator = '';
-				for($i = 0; $i < $level; $i++)
+				for ($i = 0; $i < $level; $i++)
 				{
-					$separator .= '&nbsp;-&nbsp;';
+					$separator .= '&nbsp;&nbsp;&nbsp;-&nbsp;';
 				}
 
 				$check_path = substr($path, 0, -1);
 				if ($entry == $check_path)
 				{
-					$selected = ' selected="selected"';
+					$selected = ' selected="selected" ';
 				}
 				else
 				{
 					$selected = '';
 				}
 
-				$cat_path = str_replace(DL_EXT_FILES_FOLDER, '', $file_base . $entry);
-				$tree .= '<option value="' . $cat_path . '/"' . $selected . '>' . $separator . $entry . '/</option>';
+				$cat_path = str_replace(DL_EXT_FILES_FOLDER, '', $file_base . $entry . '/');
+				$entry_path = str_replace(DL_EXT_FILES_FOLDER, '', $file_base);
+				$tree[] = array(
+					'cat_path'	=> $cat_path,
+					'selected'	=> $selected,
+					'entry'		=> $separator . $entry . '/',
+				);
 
 				$level++;
-				$tree .= self::get_file_base_tree($file_base . $entry, $path, $level);
+				$tmp_tree = self::get_file_base_tree($file_base . $entry, $path, $level);
 				$level--;
+
+				if (is_array($tmp_tree))
+				{								
+					$tree = array_merge($tree, $tmp_tree);
+				}					
 			}
 		}
 

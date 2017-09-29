@@ -417,7 +417,7 @@ if ($action == 'browse' || $action == '' || $action == 'unassigned')
 				if (is_dir(DL_EXT_FILES_FOLDER . $path . '/' . $file))
 				{
 					$slash = ($path) ? '/' : '';
-					$dirs[] = '<a href="' . $basic_link . '&amp;action=browse&amp;path=' . $path . $slash . $file . '">' . $file . '</a>';
+					$dirs[] = $path . $slash . $file . '|~|<a href="' . $basic_link . '&amp;action=browse&amp;path=' . $path . $slash . $file . '">' . $file . '</a>';
 
 					$sh = @opendir(DL_EXT_FILES_FOLDER . $path . '/' . $file);
 
@@ -438,7 +438,7 @@ if ($action == 'browse' || $action == '' || $action == 'unassigned')
 				else
 				{
 					$real_file_name = (isset($real_file_array[$file])) ? $real_file_array[$file] : $file;
-					$files[] = '<a href="' . DL_EXT_FILES_FOLDER . $path . '/' . $file.'">' . $real_file_name . '</a>';
+					$files[] = $real_file_name . '|~|<a href="' . DL_EXT_FILES_FOLDER . $path . '/' . $file.'">' . $real_file_name . '</a>';
 					$filen[] = $file;
 					$sizes[] = sprintf("%u", @filesize(DL_EXT_FILES_FOLDER . $path .'/' . $file));
 					$exist[] = (in_array($file, $existing_files)) ? true : 0;
@@ -501,10 +501,11 @@ if ($action == 'browse' || $action == '' || $action == 'unassigned')
 	if ($dirs)
 	{
 		natcasesort($dirs);
-		for($i = 0; $i < sizeof($dirs); $i++)
+		foreach($dirs as $i => $value)
 		{
+			$dir_ary = explode('|~|', $value);
 			$template->assign_block_vars('dirs_row', array(
-				'DIR_LINK' => '»&nbsp;' . $dirs[$i],
+				'DIR_LINK' => '»&nbsp;' . $dir_ary[1],
 				'DIR_DELETE_LINK' => $dirs_delete[$i])
 			);
 		}
@@ -515,9 +516,10 @@ if ($action == 'browse' || $action == '' || $action == 'unassigned')
 		natcasesort($files);
 		$overall_size = 0;
 		$missing_count = 0;
-		for($i = 0; $i < sizeof($files); $i++)
+		foreach($files as $i => $value)
 		{
-			$file_size = ($action != 'unassigned') ? $sizes[$i] : sprintf("%u", @filesize(DL_EXT_FILES_FOLDER . $files[$i]));
+			$files_ary = explode('|~|', $value);
+			$file_size = ($action != 'unassigned') ? $sizes[$i] : sprintf("%u", @filesize(DL_EXT_FILES_FOLDER . $files_ary[1]));
 
 			$file_size_tmp = \oxpus\dl_ext\includes\classes\ dl_format::dl_size($file_size, 2, 'no');
 			$file_size_out = $file_size_tmp['size_out'];
@@ -526,7 +528,7 @@ if ($action == 'browse' || $action == '' || $action == 'unassigned')
 			if ($action != 'unassigned')
 			{
 				$template->assign_block_vars('files_row', array(
-					'FILE_NAME' => $files[$i],
+					'FILE_NAME' => $files_ary[1],
 					'FILE_SIZE' => $file_size_out,
 					'FILE_SIZE_RANGE' => $file_size_range,
 					'FILE_EXIST' => (!$exist[$i]) ? '<input type="checkbox" class="permissions-checkbox" name="files[]" value="' . $filen[$i] . '" />' : '<input type="checkbox" class="permissions-checkbox" value="" disabled="disabled" />',
@@ -540,8 +542,8 @@ if ($action == 'browse' || $action == '' || $action == 'unassigned')
 			else
 			{
 				$template->assign_block_vars('files_row', array(
-					'FILE_NAME' => $unas_files[substr($files[$i], strrpos($files[$i], '/') + 1)],
-					'FILE_NAME_REAL' => $files[$i],
+					'FILE_NAME' => $unas_files[substr($files_ary[1], strrpos($files_ary[1], '/') + 1)],
+					'FILE_NAME_REAL' => $files_ary[1],
 					'FILE_SIZE' => $file_size_out,
 					'FILE_SIZE_RANGE' => $file_size_range,
 					'FILE_EXIST' => '<input type="checkbox" class="permissions-checkbox" name="files[]" value="' . $files_data[$i] . '" />')

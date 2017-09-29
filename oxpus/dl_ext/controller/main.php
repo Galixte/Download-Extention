@@ -94,6 +94,14 @@ class main
 
 	public function handle($view = '')
 	{
+		if (isset($this->user->data['user_wrong_email']))
+		{
+			if ($this->user->data['user_wrong_email'] != 0)
+			{
+				trigger_error($this->user->lang['DL_NO_PERMISSION']);
+			}
+		}
+
 		include($this->root_path . 'includes/functions_user.' . $this->php_ext);
 		include($this->root_path . 'includes/functions_display.' . $this->php_ext);
 		include($this->root_path . 'includes/bbcode.' . $this->php_ext);
@@ -131,8 +139,8 @@ class main
 		define('DL_EXT_VER_IMAGES_WFOLDER',	$filebase_web_prefix . 'version/images/');
 
 		$this->template->assign_vars(array(
-			'EXT_PATH_WEB'		=> $ext_path_web,
-			'EXT_PATH_AJAX'		=> $ext_path_ajax,
+			'EXT_DL_PATH_WEB'		=> $ext_path_web,
+			'EXT_DL_PATH_AJAX'		=> $ext_path_ajax,
 			'ICON_DL_HELP'		=> '<img src="' . $ext_path_web . 'styles/' . rawurlencode($this->user->style['style_path']) . '/theme/images/dl_help.gif" alt="" />',
 			'IMG_DL_BLUE'		=> $ext_path_images . 'dl_blue.png',
 			'IMG_DL_BUTTON'		=> $ext_path_images . 'dl_button.png',
@@ -346,14 +354,15 @@ class main
 
 		switch ($view)
 		{
-			case 'overall':
-			case 'load':
-			case 'detail':
-			case 'thumbs':
-			case 'comment':
-			case 'upload':
-			case 'modcp':
 			case 'bug_tracker':
+			case 'comment':
+			case 'detail':
+			case 'latest':
+			case 'load':
+			case 'modcp':
+			case 'overall':
+			case 'thumbs':
+			case 'upload':
 
 				$index = \oxpus\dl_ext\includes\classes\ dl_main::full_index($this->helper);
 			break;
@@ -377,12 +386,26 @@ class main
 		{
 			$file_id = ($df_id) ? $df_id : $dl_id;
 
-			$sql = 'SELECT cat, description FROM ' . DOWNLOADS_TABLE . '
+			$sql = 'SELECT cat, description, desc_uid, desc_bitfield, desc_flags, hack_version FROM ' . DOWNLOADS_TABLE . '
 				WHERE id = ' . (int) $file_id;
 			$result = $this->db->sql_query($sql);
 			$row = $this->db->sql_fetchrow($result);
 			$cat_id = (!$cat_id) ? $row['cat'] : $cat_id;
-			$description = $row['description'];
+			$description		= $row['description'];
+			$desc_uid			= $row['desc_uid'];
+			$desc_bitfield		= $row['desc_bitfield'];
+			$desc_flags			= $row['desc_flags'];
+			$description		= generate_text_for_display($description, $desc_uid, $desc_bitfield, $desc_flags);
+			
+			$mini_icon			= \oxpus\dl_ext\includes\classes\ dl_status::mini_status_file($cat_id, $df_id, $ext_path_images);
+			
+			$hack_version		= '&nbsp;'.$row['hack_version'];
+			
+			$file_status	= array();
+			$file_status	= \oxpus\dl_ext\includes\classes\ dl_status::status($df_id, $this->helper, $ext_path_images);
+			
+			$status			= $file_status['status_detail'];
+
 			$this->db->sql_freeresult($result);
 		}
 		else
@@ -429,8 +452,13 @@ class main
 				$nav_string['link'][] = array('view' => 'overall');
 				$nav_string['name'][] = $this->user->lang['DL_OVERVIEW'];
 			break;
+			case 'latest':
+				$nav_string['link'][] = array('view' => 'latest');
+				$nav_string['name'][] = $this->user->lang['DL_LATEST_DOWNLOADS'];
+			break;
 			case 'version':
 			case 'detail':
+			case 'broken':
 				$nav_string['link'][] = array('view' => 'detail', 'df_id' => $df_id);
 				$nav_string['name'][] = $this->user->lang['DL_DETAIL'] . ': ' . $description;
 			break;
@@ -443,8 +471,6 @@ class main
 			case 'comment':
 				$nav_string['link'][] = array('view' => 'detail', 'df_id' => $df_id);
 				$nav_string['name'][] = $this->user->lang['DL_DETAIL'] . ': ' . $description;
-//				$nav_string['link'][] = array('view' => 'comment', 'df_id' => $df_id, 'cat_id' = $cat_id, 'action' => 'view');
-//				$nav_string['name'][] = $this->user->lang['DL_COMMENTS'];
 			break;
 			case 'upload':
 				$nav_string['link'][] = array('view' => 'upload', 'cat_id' => $cat_id);
@@ -524,10 +550,12 @@ class main
 
 					if (sizeof($tmp_nav['link']))
 					{
+
 						for ($i = sizeof($tmp_nav['link']) - 1; $i >= 0; $i--)
 						{
 							$nav_string['link'][] = $tmp_nav['link'][$i];
 							$nav_string['name'][] = $tmp_nav['name'][$i];
+							$index_cat_name = $tmp_nav['name'][$i];
 						}
 					}
 				}
@@ -539,6 +567,11 @@ class main
 				'U_VIEW_FORUM'	=> $this->helper->route('dl_ext_controller', $nav_string['link'][$i]),
 				'FORUM_NAME'	=> $nav_string['name'][$i],
 			));
+		}
+
+		if (isset($index_cat_name))
+		{
+			$this->template->assign_var('INDEX_CAT_TITLE', $index_cat_name);
 		}
 
 		/*
@@ -765,6 +798,10 @@ class main
 					));
 
 					$this->template->assign_vars(array(
+						'DESCRIPTION'		=> $description,
+						'MINI_IMG'			=> $mini_icon,
+						'HACK_VERSION'		=> $hack_version,
+						'STATUS'			=> $status,
 						'MESSAGE_TITLE'		=> $this->user->lang['DL_BROKEN'],
 						'MESSAGE_TEXT'		=> $this->user->lang['DL_REPORT_CONFIRM_CODE'],
 
@@ -793,6 +830,10 @@ class main
 				);
 
 				$this->template->assign_vars(array(
+					'DESCRIPTION'		=> $description,
+					'MINI_IMG'			=> $mini_icon,
+					'HACK_VERSION'		=> $hack_version,
+					'STATUS'			=> $status,
 					'MESSAGE_TITLE'		=> $this->user->lang['DL_BROKEN'],
 					'MESSAGE_TEXT'		=> $this->user->lang['DL_REPORT_CONFIRM_CODE'],
 
@@ -1073,6 +1114,11 @@ class main
 			}
 		}
 
+		if ($view == 'latest' && sizeof($index))
+		{
+			include($ext_path . '/includes/modules/dl_latest.' . $this->php_ext);
+		}
+
 		/*
 		* default user entry. redirect to index or category
 		*/
@@ -1081,7 +1127,7 @@ class main
 			include($ext_path . '/includes/modules/dl_cat.' . $this->php_ext);
 		}
 
-		$view_check = array('broken', 'bug_tracker', 'comment', 'detail', 'fav', 'load', 'modcp', 'overall', 'rss', 'search', 'stat', 'thumbs', 'todo', 'unbroken', 'unfav', 'upload', 'user_config', 'view', 'version');
+		$view_check = array('broken', 'bug_tracker', 'comment', 'detail', 'fav', 'latest', 'load', 'modcp', 'overall', 'rss', 'search', 'stat', 'thumbs', 'todo', 'unbroken', 'unfav', 'upload', 'user_config', 'view', 'version');
 
 		if (in_array($view, $view_check))
 		{

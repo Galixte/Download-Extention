@@ -18,6 +18,8 @@ class main_module
 	var $u_action;
 	var $edit_lang_id;
 	var $lang_defs;
+	var $user;
+	var $request;
 
 	function main($id, $mode)
 	{
@@ -120,7 +122,7 @@ class main_module
 		* initiate the help system
 		*/
 		$template->assign_vars(array(
-			'U_HELP_POPUP' => str_replace('&amp;', '&', $this->u_action . '&amp;action=help&amp;help_key='),
+			'U_HELP_POPUP' => str_replace('&amp;', '&', $this->u_action . '&amp;action=help'),
 		));
 
 		/*
@@ -128,7 +130,9 @@ class main_module
 		*/		
 		if ($action == 'help')
 		{
-			include_once($ext_path . 'includes/helpers/dl_help_adm.' . $phpEx);
+			$this->user = $user;
+			$this->request = $request;
+			include_once($ext_path . 'includes/helpers/dl_help.' . $phpEx);
 		}
 
 		/*
@@ -148,14 +152,16 @@ class main_module
 
 		if ($cancel)
 		{
-			$action = '';
+			redirect($basic_link);
 		}
 
 		/*
 		* create overall mini statistics
 		*/
-		$total_todo = sizeof(\oxpus\dl_ext\includes\classes\ dl_files::all_files(0, '', 'ASC', "AND todo <> '' AND todo IS NOT NULL", 0, true, 'id'));
 		$total_size = \oxpus\dl_ext\includes\classes\ dl_physical::read_dl_sizes();
+		$total_tsize = \oxpus\dl_ext\includes\classes\ dl_physical::read_dl_sizes(DL_EXT_THUMBS_FOLDER);
+		$total_vfsize = \oxpus\dl_ext\includes\classes\ dl_physical::read_dl_sizes(DL_EXT_VER_FILES_FOLDER);
+		$total_vtsize = \oxpus\dl_ext\includes\classes\ dl_physical::read_dl_sizes(DL_EXT_VER_IMAGES_FOLDER);
 		$total_dl = \oxpus\dl_ext\includes\classes\ dl_main::get_sublevel_count();
 		$total_extern = sizeof(\oxpus\dl_ext\includes\classes\ dl_files::all_files(0, '', 'ASC', "AND extern = 1", 0, true, 'id'));
 
@@ -172,80 +178,140 @@ class main_module
 			case 'overview':
 				$this->page_title = 'ACP_DOWNLOADS';
 
-				if ($total_dl && $total_size)
+				if ($request->variable('reset_clicks', ''))
 				{
-					$total_size = \oxpus\dl_ext\includes\classes\ dl_format::dl_size($total_size, 2);
+					if (!confirm_box(true))
+					{
+						confirm_box(false, $user->lang['DL_ACP_CONFIRM_RESET_CLICKS'], build_hidden_fields(array(
+							'i'				=> $id,
+							'mode'			=> $mode,
+							'reset_clicks'	=> true,
+						)));
+					 }
+					 else
+					 {
+					 	$sql = 'UPDATE ' . DOWNLOADS_TABLE . ' SET ' . $db->sql_build_array('UPDATE', array('klicks' => 0));
+					 	$db->sql_query($sql);
 
-					$template->assign_block_vars('total_stat', array(
-						'TOTAL_STAT' => sprintf($user->lang['DL_TOTAL_STAT'], $total_dl, $total_size, $physical_limit, $total_extern))
-					);
+						trigger_error($user->lang['DL_ACP_CONFIRM_RESET_FINISH'] . adm_back_link($this->u_action));
+					 }
 				}
 
-				if (!$config['dl_traffic_off'])
+				if ($request->variable('reset_stats', ''))
 				{
-					$remain_traffic = $config['dl_overall_traffic'] - $config['dl_remain_traffic'];
-
-					if (DL_OVERALL_TRAFFICS == true)
+					if (!confirm_box(true))
 					{
-						if ($remain_traffic <= 0)
+						confirm_box(false, $user->lang['DL_ACP_CONFIRM_RESET_STATS'], build_hidden_fields(array(
+							'i'				=> $id,
+							'mode'			=> $mode,
+							'reset_stats'	=> true,
+						)));
+					 }
+					 else
+					 {
+					 	$sql = 'DELETE FROM ' . DL_STATS_TABLE;
+					 	$db->sql_query($sql);
+
+						trigger_error($user->lang['DL_ACP_CONFIRM_RESET_FINISH'] . adm_back_link($this->u_action));
+					 }
+				}
+
+				if ($request->variable('reset_cache', ''))
+				{
+					if (!confirm_box(true))
+					{
+						confirm_box(false, $user->lang['DL_ACP_CONFIRM_RESET_CACHE'], build_hidden_fields(array(
+							'i'				=> $id,
+							'mode'			=> $mode,
+							'reset_cache'	=> true,
+						)));
+					 }
+					 else
+					 {
+						$cache->destroy('config');
+						@unlink(DL_EXT_CACHE_FOLDER . 'data_dl_auth.' . $phpEx);
+						@unlink(DL_EXT_CACHE_FOLDER . 'data_dl_black.' . $phpEx);
+						@unlink(DL_EXT_CACHE_FOLDER . 'data_dl_cat_counts.' . $phpEx);
+						@unlink(DL_EXT_CACHE_FOLDER . 'data_dl_cats.' . $phpEx);
+						@unlink(DL_EXT_CACHE_FOLDER . 'data_dl_file_presets.' . $phpEx);
+
+						trigger_error($user->lang['DL_ACP_CONFIRM_RESET_FINISH'] . adm_back_link($this->u_action));
+					 }
+				}
+
+				$total_size = \oxpus\dl_ext\includes\classes\ dl_format::dl_size($total_size, 2);
+				$total_tsize = \oxpus\dl_ext\includes\classes\ dl_format::dl_size($total_tsize, 2);
+				$total_vfsize = \oxpus\dl_ext\includes\classes\ dl_format::dl_size($total_vfsize, 2);
+				$total_vtsize = \oxpus\dl_ext\includes\classes\ dl_format::dl_size($total_vtsize, 2);
+
+				$remain_traffic = \oxpus\dl_ext\includes\classes\ dl_format::dl_size($config['dl_overall_traffic'] - $config['dl_remain_traffic'], 2);
+				$overall_traffic = \oxpus\dl_ext\includes\classes\ dl_format::dl_size($config['dl_overall_traffic']);
+				$overall_guest_traffic = \oxpus\dl_ext\includes\classes\ dl_format::dl_size($config['dl_overall_guest_traffic']);
+				$remain_guest_traffic = \oxpus\dl_ext\includes\classes\ dl_format::dl_size($config['dl_overall_guest_traffic'] - $config['dl_remain_guest_traffic'], 2);
+
+				$sql = "SELECT SUM(CASE WHEN todo <> '' THEN 1 ELSE 0 END) as todos, SUM(broken) as broken, sum(klicks) as mclick, sum(overall_klicks) as oclick FROM " . DOWNLOADS_TABLE . '
+						WHERE approve = ' . true;
+				$result	= $db->sql_query($sql);
+				$row = $db->sql_fetchrow($result);
+				$db->sql_freeresult($result);
+				$mclick	= $row['mclick'];
+				$oclick	= $row['oclick'];
+				$todos	= $row['todos'];
+				$broken	= $row['broken'];
+
+				$index = array();
+				$index = \oxpus\dl_ext\includes\classes\ dl_main::full_index();
+
+				$cats = 0;
+				$subs = 0;
+
+				if (sizeof($index))
+				{
+					foreach($index as $cat_id => $data)
+					{
+						if ($data['parent'] == 0)
 						{
-							$overall_traffic = \oxpus\dl_ext\includes\classes\ dl_format::dl_size($config['dl_overall_traffic']);
-	
-							if ($user->data['user_type'] == USER_FOUNDER && FOUNDER_TRAFFICS_OFF)
-							{
-								$user->lang['DL_NO_MORE_REMAIN_TRAFFIC'] = '<strong>' . $user->lang['DL_TRAFFICS_FOUNDER_INFO'] . ':</strong> ' . $user->lang['DL_NO_MORE_REMAIN_TRAFFIC'];
-							}
-			
-							$template->assign_block_vars('no_remain_traffic', array(
-								'NO_OVERALL_TRAFFIC' => sprintf($user->lang['DL_NO_MORE_REMAIN_TRAFFIC'], $overall_traffic))
-							);
+							++$cats;
 						}
 						else
 						{
-							$remain_text_out = $user->lang['DL_REMAIN_OVERALL_TRAFFIC'] . '<b>' . \oxpus\dl_ext\includes\classes\ dl_format::dl_size($remain_traffic, 2) . '</b>';
-	
-							if ($user->data['user_type'] == USER_FOUNDER && FOUNDER_TRAFFICS_OFF)
-							{
-								$remain_text_out = '<strong>' . $user->lang['DL_TRAFFICS_FOUNDER_INFO'] . ':</strong> ' . $remain_text_out;
-							}
-			
-							$template->assign_block_vars('remain_traffic', array(
-								'REMAIN_TRAFFIC' => $remain_text_out)
-							);
+							++$subs;
 						}
 					}
+				}
 
-					if (DL_GUESTS_TRAFFICS == true)
-					{
-						if ($config['dl_overall_guest_traffic'] - $config['dl_remain_guest_traffic'] <= 0)
-						{
-							$overall_guest_traffic = \oxpus\dl_ext\includes\classes\ dl_format::dl_size($config['dl_overall_guest_traffic']);
-	
-							$template->assign_block_vars('no_remain_guest_traffic', array(
-								'NO_OVERALL_GUEST_TRAFFIC' => sprintf($user->lang['DL_NO_MORE_REMAIN_GUEST_TRAFFIC'], $overall_guest_traffic))
-							);
-						}
-						else
-						{
-							$remain_guest_traffic = $config['dl_overall_guest_traffic'] - $config['dl_remain_guest_traffic'];
-	
-							$remain_guest_text_out = $user->lang['DL_REMAIN_OVERALL_GUEST_TRAFFIC'] . '<b>' . \oxpus\dl_ext\includes\classes\ dl_format::dl_size($remain_guest_traffic, 2) . '</b>';
-	
-							$template->assign_block_vars('remain_guest_traffic', array(
-								'REMAIN_GUEST_TRAFFIC' => $remain_guest_text_out)
-							);
-						}
-					}
-				}
-				else
-				{
-					$template->assign_var('S_DL_TRAFFIC_OFF', true);
-				}
+				$sql = 'SELECT count(ver_id) as versions FROM ' . DL_VERSIONS_TABLE;
+				$result	= $db->sql_query($sql);
+				$row = $db->sql_fetchrow($result);
+				$db->sql_freeresult($result);
+				$total_versions	= $row['versions'];
 
 				$template->assign_vars(array(
+					'TOTAL_NUM'				=> $total_dl,
+					'TOTAL_SIZE'			=> $total_size,
+					'TOTAL_LIMIT'			=> $physical_limit,
+					'TOTAL_EXTERN'			=> $total_extern,
+					'REMAIN_TRAFFIC'		=> ($remain_traffic <= 0) ? $user->lang['DL_ACP_MAIN_STATS_REMAIN_OFF'] : $remain_traffic,
+					'OVERALL_TRAFFIC'		=> $overall_traffic,
+					'REMAIN_GTRAFFIC'		=> ($remain_guest_traffic <= 0) ? $user->lang['DL_ACP_MAIN_STATS_REMAIN_OFF'] : $remain_guest_traffic,
+					'OVERALL_GTRAFFIC'		=> $overall_guest_traffic,
+					'MCLICKS'				=> $mclick,
+					'OCLICKS'				=> $oclick,
+					'CATEGORIES'			=> $cats,
+					'SUBCATEGORIES'			=> $subs,
+					'TOTAL_TODOS'			=> $todos,
+					'TOTAL_BROKEN'			=> $broken,
+					'TOTAL_VERSIONS'		=> $total_versions,
+					'TOTAL_THUMBS_SIZE'		=> $total_tsize,
+					'TOTAL_VERSION_FSIZE'	=> $total_vfsize,
+					'TOTAL_VERSION_TSIZE'	=> $total_vtsize,
+
 					'DL_MANAGEMENT_TITLE'	=> $user->lang['DL_ACP_MANAGEMANT_PAGE'],
 					'DL_MANAGEMENT_EXPLAIN'	=> $user->lang['DL_ACP_MANAGEMANT_PAGE_EXPLAIN'],
 					'DL_MOD_VERSION'		=> sprintf($user->lang['DL_MOD_VERSION'], $config['dl_ext_version']),
+					'DL_MOD_VERSION_SIMPLE'	=> $config['dl_ext_version'],
+
+					'S_DL_TRAFFIC_OFF'	=> ($config['dl_traffic_off']) ? true : false,
 				));
 
 				$template->assign_var('S_DL_OVERVIEW', true);
@@ -308,7 +374,7 @@ class main_module
 		}
 
 		$template->assign_vars(array(
-			'DL_MOD_RELEASE' => sprintf($user->lang['DL_MOD_VERSION'], $config['dl_ext_version']),
+			'DL_MOD_RELEASE'	=> sprintf($user->lang['DL_MOD_VERSION'], $config['dl_ext_version']),
 		));
 	}
 

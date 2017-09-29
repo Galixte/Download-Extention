@@ -33,7 +33,7 @@ while ($row = $this->db->sql_fetchrow($result))
 }
 $this->db->sql_freeresult($result);
 
-if (isset($fav_id))
+if (isset($fav_id) && $fav_id <> 0)
 {
 	$sql = 'SELECT * FROM ' . DL_BUGS_TABLE . '
 		WHERE report_id = ' . (int) $fav_id;
@@ -816,18 +816,13 @@ if (!$action)
 	$s_select_filter .= '</select>';
 	$s_select_filter = str_replace('value="'.$bt_filter.'">', 'value="'.$bt_filter.'" selected="selected">', $s_select_filter);
 
-	$s_hidden_fields = array(
-		'df_id'		=> $df_id,
-		'action'	=> 'add'
-	);
-
 	$this->template->assign_vars(array(
 		'S_SELECT_FILTER'			=> $s_select_filter,
 		'S_FORM_ACTION'				=> $this->helper->route('dl_ext_controller', array('view' => 'bug_tracker')),
+		'S_FORM_ADD_ACTION'			=> $this->helper->route('dl_ext_controller', array('view' => 'bug_tracker', 'action' => 'add', 'df_id' => 0, 'fav_id' => 0)),
 		'S_FORM_FILTER_ACTION'		=> $this->helper->route('dl_ext_controller', array('view' => 'bug_tracker', 'df_id' => $df_id)),
 		'S_FORM_OWN_ACTION'			=> $this->helper->route('dl_ext_controller', array('view' => 'bug_tracker', 'df_id' => $df_id, 'bt_show' => 'own')),
 		'S_FORM_ASSIGN_ACTION'		=> $this->helper->route('dl_ext_controller', array('view' => 'bug_tracker', 'df_id' => $df_id, 'bt_show' => 'assign')),
-		'S_HIDDEN_FIELDS'			=> build_hidden_fields($s_hidden_fields),
 
 		'U_DOWNLOAD'				=> $this->helper->route('dl_ext_controller'),
 		'U_BUG_TRACKER'				=> $this->helper->route('dl_ext_controller', array('view' => 'bug_tracker')),

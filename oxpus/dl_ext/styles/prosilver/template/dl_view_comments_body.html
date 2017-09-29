@@ -1,52 +1,56 @@
 <!-- INCLUDE dl_header.html -->
 
-	<!-- BEGIN comment_row -->
-	<div class="panel <!-- IF comment_row.S_ROW_COUNT is even -->bg1<!-- ELSE -->bg2<!-- ENDIF -->">
-		<div class="inner">
+<h2>{STATUS} <label>{DESCRIPTION}{HACK_VERSION} {MINI_IMG}</label></h2>
 
-		<div class="post">
-			<div class="postbody">
-				<ul class="post-buttons">
-					<!-- BEGIN action_button -->
-						<li><a class="button icon-button edit-icon" href="{comment_row.U_EDIT_COMMENT}" title="{L_EDIT_POST}"><span>{L_EDIT_POST}</span></a></li>
-						<li><a class="button icon-button delete-icon" href="{comment_row.U_DELETE_COMMENT}" title="{L_DELETE_POST}"><span>{L_DELETE}</span></a></li>
-					<!-- END action_button -->
-				</ul>
-				<div class="content">{comment_row.MESSAGE}</div>
-				<!-- IF comment_row.EDITED_BY --><br /><div class="notice">{comment_row.EDITED_BY}</div><!-- ENDIF -->
-			</div>
-			<dl class="postprofile">
-			<dt>
-				{comment_row.POSTER}<br /><span class="small">{comment_row.POST_TIME}</span><br />{comment_row.POSTER_AVATAR}
-			</dt>
-			</dl>
-		</div>
+<br />
 
+<!-- BEGIN comment_row -->
+<div class="panel dlext">
+	<div class="inner">
+
+	<div class="post">
+		<div class="postbody">
+			<ul class="post-buttons">
+				<!-- BEGIN action_button -->
+					<li><a class="button icon-button edit-icon" href="{comment_row.U_EDIT_COMMENT}" title="{L_EDIT_POST}"><span>{L_EDIT_POST}</span></a></li>
+					<li><a class="button icon-button delete-icon" href="{comment_row.U_DELETE_COMMENT}" title="{L_DELETE_POST}"><span>{L_DELETE}</span></a></li>
+				<!-- END action_button -->
+			</ul>
+			<div class="content">{comment_row.MESSAGE}</div>
+			<!-- IF comment_row.EDITED_BY --><br /><div class="notice">{comment_row.EDITED_BY}</div><!-- ENDIF -->
 		</div>
+		<dl class="postprofile">
+		<dt>
+			{comment_row.POSTER}<br /><span class="small">{comment_row.POST_TIME}</span><br />{comment_row.POSTER_AVATAR}
+		</dt>
+		</dl>
 	</div>
-	<!-- END comment_row -->
 
-	<!-- IF .pagination or TOTAL_DL -->
-		<div class="pagination">
-			{TOTAL_DL}
-			<!-- IF .pagination -->
-				<!-- INCLUDE pagination.html -->
-			<!-- ELSE -->
-				&bull; {PAGE_NUMBER}
-			<!-- ENDIF -->
-		</div>
-	<!-- ENDIF -->
+	</div>
+</div>
+<!-- END comment_row -->
 
-	<!-- IF S_COMMENT_BUTTON -->
-	<form action="{S_FORM_ACTION}" method="post" id="comments_view">
+<!-- IF .pagination or TOTAL_DL -->
+	<div class="pagination">
+		{TOTAL_DL}
+		<!-- IF .pagination -->
+			<!-- INCLUDE pagination.html -->
+		<!-- ELSE -->
+			&bull; {PAGE_NUMBER}
+		<!-- ENDIF -->
+	</div>
+<!-- ENDIF -->
 
-	<fieldset class="submit-buttons">
-		<input type="submit" name="post" value="{L_POST_COMMENT}" class="button2" />
-		{S_HIDDEN_FIELDS}
-	</fieldset>
+<!-- IF S_COMMENT_BUTTON -->
+<form action="{S_FORM_ACTION}" method="post" id="comments_view">
 
-	</form>
-	<!-- ENDIF -->
+<fieldset class="submit-buttons">
+	<input type="submit" name="post" value="{L_POST_COMMENT}" style="height: 28px;" class="button icon-button" />
+	{S_HIDDEN_FIELDS}
+</fieldset>
+
+</form>
+<!-- ENDIF -->
 
 <br />
 

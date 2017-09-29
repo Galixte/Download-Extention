@@ -44,18 +44,19 @@ else
 	$help_option = '';
 }
 
-$this->template->assign_vars(array(
-	'L_CLOSE'		=> $this->user->lang['CLOSE_WINDOW'],
+$json_out = json_encode(array('title' => $this->user->lang['HELP_TITLE'], 'option' => $help_option, 'string' => $help_string));
 
-	'HELP_TITLE'	=> $this->user->lang['HELP_TITLE'],
-	'HELP_OPTION'	=> $help_option,
-	'HELP_STRING'	=> $help_string)
+$http_headers = array(
+	'Content-type' => 'text/html; charset=UTF-8',
+	'Cache-Control' => 'private, no-cache="set-cookie"',
+	'Expires' => gmdate('D, d M Y H:i:s', time()) . ' GMT',
 );
 
-page_header($this->user->lang['HELP_TITLE'], false);
+foreach ($http_headers as $hname => $hval)
+{
+	header((string) $hname . ': ' . (string) $hval);
+}
 
-$this->template->set_filenames(array(
-	'body' => 'dl_help_body.html')
-);
-
-page_footer();
+echo ($json_out);
+flush();
+exit;

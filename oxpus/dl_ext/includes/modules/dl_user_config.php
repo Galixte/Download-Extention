@@ -112,8 +112,9 @@ $allow_fav_email_no		= (!$this->user->data['user_allow_fav_download_email']) ? '
 $allow_com_email_yes	= ($this->user->data['user_allow_fav_comment_email']) ? 'checked="checked"' : '';
 $allow_com_email_no		= (!$this->user->data['user_allow_fav_comment_email']) ? 'checked="checked"' : '';
 
-$user_dl_note_type_popup	= ($this->user->data['user_dl_note_type']) ? 'checked="checked"' : '';
-$user_dl_note_type_message	= (!$this->user->data['user_dl_note_type']) ? 'checked="checked"' : '';
+$user_dl_note_type_popup	= ($this->user->data['user_dl_note_type'] == 1) ? 'checked="checked"' : '';
+$user_dl_note_type_message	= ($this->user->data['user_dl_note_type'] == 0) ? 'checked="checked"' : '';
+$user_dl_note_type_notify	= ($this->user->data['user_dl_note_type'] == 2) ? 'checked="checked"' : '';
 $user_dl_sort_opt			= ($this->user->data['user_dl_sort_opt']) ? 'checked="checked"' : '';
 
 $user_dl_sub_on_index_yes	= ($this->user->data['user_dl_sub_on_index']) ? 'checked="checked"' : '';
@@ -199,6 +200,7 @@ $this->template->assign_vars(array(
 
 	'USER_DL_NOTE_TYPE_POPUP'			=> $user_dl_note_type_popup,
 	'USER_DL_NOTE_TYPE_MESSAGE'			=> $user_dl_note_type_message,
+	'USER_DL_NOTE_TYPE_NOTIFY'			=> $user_dl_note_type_notify,
 
 	'USER_DL_SUB_ON_INDEX_YES'			=> $user_dl_sub_on_index_yes,
 	'USER_DL_SUB_ON_INDEX_NO'			=> $user_dl_sub_on_index_no,

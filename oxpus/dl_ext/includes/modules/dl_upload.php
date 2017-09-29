@@ -433,6 +433,10 @@ if ($submit)
 					WHERE user_allow_new_download_popup = 1
 					AND ' . $this->db->sql_in_set('user_id', explode(',', $processing_user));
 			$this->db->sql_query($sql);
+
+			$notification = $this->phpbb_container->get('notification_manager');
+			$notification_data = array('notification_id' => $next_id);
+			$notification->add_notifications('oxpus.dl_ext.notification.type.dl_ext', $notification_data);
 		}
 
 
@@ -459,6 +463,10 @@ if ($submit)
 		$approve_message = ($approve) ? '' : '<br />' . $this->user->lang['DL_MUST_BE_APPROVED'];
 
 		$message = $this->user->lang['DOWNLOAD_ADDED'] . $thumb_message . $approve_message . '<br /><br />' . sprintf($this->user->lang['CLICK_RETURN_DOWNLOADS'], '<a href="' . $this->helper->route('dl_ext_controller', array('cat' => $cat_id)) . '">', '</a>');
+		if ($cat_auth['auth_up'])
+		{
+			$message .= '<br /><br />' . sprintf($this->user->lang['DL_UPLOAD_ONE_MORE'], '<a href="' . $this->helper->route('dl_ext_controller', array('view' => 'upload', 'cat_id' => $cat_id)) . '">', '</a>');
+		}
 
 		// Purge the files cache
 		@unlink(DL_EXT_CACHE_FOLDER . 'data_dl_cat_counts.' . $this->php_ext);
@@ -640,8 +648,9 @@ $this->template->assign_vars(array(
 	'S_FILE_EXT_SIZE_RANGE'	=> $s_file_ext_size_range,
 	'S_HACKLIST'			=> $s_hacklist,
 	'S_DOWNLOADS_ACTION'	=> $this->helper->route('dl_ext_controller', array('view' => 'upload')),
-	'S_HIDDEN_FIELDS'		=> build_hidden_fields($s_hidden_fields))
-);
+	'S_HIDDEN_FIELDS'		=> build_hidden_fields($s_hidden_fields),
+	'S_ADD_DL'				=> true,
+));
 
 // Init and display the custom fields with the existing data
 $cp->get_profile_fields($df_id);

@@ -225,12 +225,6 @@ $this->template->set_filenames(array(
 
 add_form_key('dl_thumbs');
 
-$description		= $dl_files['description'];
-$desc_uid			= $dl_files['desc_uid'];
-$desc_bitfield		= $dl_files['desc_bitfield'];
-$desc_flags			= $dl_files['desc_flags'];
-$description		= generate_text_for_display($description, $desc_uid, $desc_bitfield, $desc_flags);
-
 $s_hidden_fields = array(
 	'img_id'		=> $img_id,
 	'edit_img_link'	=> $edit_img_link,
@@ -256,7 +250,10 @@ while ($row = $this->db->sql_fetchrow($result))
 $this->db->sql_freeresult($result);
 
 $this->template->assign_vars(array(
-	'DL_THUMBS_SECOND'	=> $description,
+	'DESCRIPTION'		=> $description,
+	'MINI_IMG'			=> $mini_icon,
+	'HACK_VERSION'		=> $hack_version,
+	'STATUS'			=> $status,
 	'DL_THUMB_MAX_SIZE'	=> $thumb_max_size,
 
 	'EDIT_IMG_TITLE'	=> $edit_img_title,

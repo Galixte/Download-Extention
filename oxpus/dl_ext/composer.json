@@ -2,15 +2,15 @@
 	"name": "oxpus/dl_ext",
 	"type": "phpbb-extension",
 	"description": "Download Extension for phpBB 3.1",
-	"homepage": "http://phpbb3.oxpus.net",
-	"version": "7.1.0",
+	"homepage": "https://phpbb3.oxpus.net",
+	"version": "7.1.16",
 	"time": "2015-05-11",
 	"license": "GPL-2.0",
 	"authors": [{
 			"name": "Karsten Ude",
 			"username": "oxpus",
 			"email": "karsten.ude@oxpus.net",
-			"homepage": "http://www.oxpus.net",
+			"homepage": "https://www.oxpus.net",
 			"role": "Lead Developer"
 		}],
 	"require": {
